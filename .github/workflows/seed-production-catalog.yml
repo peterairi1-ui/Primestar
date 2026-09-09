@@ -1,0 +1,93 @@
+name: Seed production catalogue
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  seed:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+
+      - name: Seed launch vendors
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          NODE_ENV: catalog-seed
+        run: |
+          if [ -z "${MONGODB_URI:-}" ]; then
+            echo "::error::The MONGODB_URI GitHub Secret is not configured."
+            exit 1
+          fi
+          npm run seed-catalog
+
+      - name: Import catalogue assets
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          NODE_ENV: catalog-seed
+        run: |
+          if [ -z "${MONGODB_URI:-}" ]; then
+            echo "::error::The MONGODB_URI GitHub Secret is not configured."
+            exit 1
+          fi
+          npm run import-catalog-assets
+
+      - name: Verify production catalogue API
+        working-directory: .
+        run: |
+          node <<'NODE'
+          const apiBase = 'https://primestar-uymu.onrender.com/api';
+          const expectedVendors = new Set([
+            'Genesis',
+            'Kilimanjaro',
+            'Chicken Republic',
+            'Market Square',
+            "D'Topic",
+            'Package Delivery'
+          ]);
+
+          async function get(path) {
+            const response = await fetch(`${apiBase}${path}`);
+            const payload = await response.json();
+            if (!response.ok) throw new Error(`${path} returned HTTP ${response.status}`);
+            return payload;
+          }
+
+          const health = await get('/health');
+          if (health.data?.status !== 'ok' || health.data?.database !== 'connected') {
+            throw new Error('Production health check did not report a connected database');
+          }
+
+          const vendorsPayload = await get('/vendors');
+          const vendors = vendorsPayload.data;
+          if (!Array.isArray(vendors) || !vendors.length) throw new Error('Production vendors response is empty');
+          const vendorNames = new Set(vendors.map((vendor) => vendor.name));
+          for (const name of expectedVendors) {
+            if (!vendorNames.has(name)) throw new Error(`Missing launch vendor: ${name}`);
+          }
+
+          const productsPayload = await get('/products');
+          const products = productsPayload.data;
+          if (!Array.isArray(products) || !products.length) throw new Error('Production products response is empty');
+          if (products.some((product) => typeof product.imageUrl !== 'string' || !product.imageUrl.startsWith('/assets/'))) {
+            throw new Error('A production product has an unexpected imageUrl');
+          }
+
+          console.log(`Verified connected production database, ${vendors.length} active vendors, ${products.length} products, and ${products.length} /assets image paths.`);
+          NODE
