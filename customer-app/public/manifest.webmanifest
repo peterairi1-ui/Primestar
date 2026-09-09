@@ -1,0 +1,15 @@
+{
+  "name": "PRIMESTAR Our Bike",
+  "short_name": "PRIMESTAR",
+  "description": "Fast. Fresh. Reliable food and local delivery.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF9EE",
+  "theme_color": "#12315B",
+  "icons": [{
+    "src": "/pwa-icon.jpeg",
+    "sizes": "any",
+    "type": "image/jpeg",
+    "purpose": "any maskable"
+  }]
+}

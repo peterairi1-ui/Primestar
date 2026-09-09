@@ -1,0 +1,12 @@
+const express = require('express');
+const { body } = require('express-validator');
+const controller = require('../controllers/authController');
+const { validate } = require('../middleware/validation');
+const router = express.Router();
+const credentials = [body('username').isLength({ min: 3 }), body('password').isLength({ min: 8 })];
+router.post('/customer/signup', [body('password').isLength({ min: 8 }), body('phone').optional().isString(), validate], controller.customerSignup);
+router.post('/customer/login', [...credentials, validate], controller.customerLogin);
+router.post('/rider/login', [...credentials, validate], controller.riderLogin);
+router.post('/admin/login', [...credentials, validate], controller.adminLogin);
+router.post('/admin/verify-otp', [body('username').isLength({ min: 3 }), body('otp').matches(/^\d{6}$/), validate], controller.verifyAdminOtp);
+module.exports = router;

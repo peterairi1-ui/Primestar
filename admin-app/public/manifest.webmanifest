@@ -1,0 +1,17 @@
+{
+  "name": "PRIMESTAR Admin",
+  "short_name": "PRIMESTAR Admin",
+  "description": "PRIMESTAR delivery operations control room",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F6F7F9",
+  "theme_color": "#12315B",
+  "icons": [
+    {
+      "src": "/pwa-icon.jpeg",
+      "sizes": "any",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ]
+}

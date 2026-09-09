@@ -1,0 +1,11 @@
+const express = require('express');
+const { authenticate } = require('../middleware/auth');
+const controller = require('../controllers/riderController');
+const router = express.Router();
+router.use(authenticate('rider'));
+router.get('/me', controller.getMe);
+router.patch('/online', controller.setOnline);
+router.get('/orders', controller.listAssignedOrders);
+router.patch('/orders/:orderId/status', controller.updateOrderStatus);
+router.get('/float', controller.getFloat);
+module.exports = router;

@@ -1,0 +1,16 @@
+const express = require('express');
+const { requireAdmin } = require('../middleware/auth');
+const controller = require('../controllers/adminOperationsController');
+const router = express.Router();
+router.use(requireAdmin);
+router.get('/dashboard', controller.dashboard);
+router.get('/settings/formula', controller.getSettings);
+router.put('/settings/formula', controller.updateSettings);
+router.post('/riders', controller.createRider);
+router.post('/riders/:id/float', controller.creditFloat);
+router.post('/orders/:orderId/confirm-payment', controller.confirmPayment);
+router.patch('/orders/:orderId/status', controller.updateOrder);
+router.get('/:resource', controller.listResource);
+router.post('/:resource', controller.createResource);
+router.patch('/:resource/:id', controller.updateResource);
+module.exports = router;

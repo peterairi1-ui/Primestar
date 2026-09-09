@@ -1,0 +1,10 @@
+const express = require('express');
+const controller = require('../controllers/orderController');
+const { authenticate, requireAdmin } = require('../middleware/auth');
+const router = express.Router();
+router.post('/', authenticate('customer'), controller.createOrder);
+router.post('/guest', controller.createOrder);
+router.get('/:orderId', controller.getOrder);
+router.post('/:orderId/payment-submitted', controller.submitPayment);
+router.post('/:orderId/confirm-payment', requireAdmin, controller.confirmPayment);
+module.exports = router;

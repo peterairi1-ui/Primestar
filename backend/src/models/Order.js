@@ -1,0 +1,8 @@
+const mongoose = require('mongoose');
+const orderStatuses = ['Placed', 'Awaiting Payment', 'Payment Confirmed', 'Rider Assigned', 'Picked Up', 'Out for Delivery', 'Delivered', 'Cancelled', 'Expired'];
+const orderSchema = new mongoose.Schema({
+  orderId: { type: String, required: true, unique: true, index: true }, customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' }, guestCustomer: { name: String, phone: String, email: String }, vendors: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Vendor' }], items: [{ product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true }, vendor: { type: mongoose.Schema.Types.ObjectId, ref: 'Vendor', required: true }, name: String, quantity: { type: Number, min: 1 }, unitPrice: { type: Number, min: 0 }, subtotal: { type: Number, min: 0 } }], pickupStops: [{ vendor: mongoose.Schema.Types.ObjectId, address: String, latitude: Number, longitude: Number }], deliveryLocation: { address: String, area: String, landmark: String, latitude: Number, longitude: Number }, itemSubtotal: { type: Number, min: 0, required: true }, deliveryFee: { type: Number, min: 0, required: true }, grandTotal: { type: Number, min: 0, required: true }, paymentState: { type: String, enum: ['unpaid', 'awaiting_confirmation', 'confirmed', 'refunded'], default: 'unpaid' }, status: { type: String, enum: orderStatuses, default: 'Placed', index: true }, rider: { type: mongoose.Schema.Types.ObjectId, ref: 'Rider' }, noRiderAvailable: { type: Boolean, default: false }, notes: String, paymentSubmittedAt: Date, paymentConfirmedAt: Date, expiredAt: Date
+}, { timestamps: true });
+orderSchema.index({ status: 1, createdAt: 1 });
+module.exports = mongoose.model('Order', orderSchema);
+module.exports.orderStatuses = orderStatuses;

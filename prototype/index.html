@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>PrimeStar — Foods & Groceries</title>
+
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <!-- ================= NAVBAR ================= -->
+
+  <header class="navbar">
+
+    <div class="logo">
+      PRIMEST<span>★</span>R
+      <small>FOODS & GROCERIES DELIVERY</small>
+    </div>
+
+    <nav class="desktop-nav">
+      <a href="#">Home</a>
+      <a href="#restaurants">Restaurants</a>
+      <a href="#">Groceries</a>
+      <a href="#">Offers</a>
+      <a href="#">Track Order</a>
+    </nav>
+
+    <div class="nav-actions">
+
+      <button class="icon-button">
+        ⌕
+      </button>
+
+      <button class="icon-button">
+        🛒
+      </button>
+
+      <!-- HAMBURGER IS ON THE RIGHT -->
+      <button class="hamburger" id="hamburger">
+        ☰
+      </button>
+
+    </div>
+
+  </header>
+
+
+  <!-- ================= MOBILE MENU ================= -->
+
+  <div class="mobile-menu" id="mobileMenu">
+
+    <a href="#">Home</a>
+    <a href="#restaurants">Restaurants</a>
+    <a href="#">Groceries</a>
+    <a href="#">Offers</a>
+    <a href="#">Track Order</a>
+
+  </div>
+
+
+  <!-- ================= HERO ================= -->
+
+  <main>
+
+    <section class="hero">
+
+      <div class="hero-content">
+
+        <div class="hero-badge">
+          ⚡ Fast. Fresh. Reliable.
+        </div>
+
+        <h1>
+          Delicious Food,
+          <br>
+          Delivered <span>Fast</span>
+        </h1>
+
+        <p>
+          Order from your favorite restaurants and get
+          delicious meals delivered straight to your doorstep.
+        </p>
+
+        <div class="hero-buttons">
+
+          <button class="primary-button">
+            Order Now →
+          </button>
+
+          <button class="secondary-button">
+            Explore Restaurants
+          </button>
+
+        </div>
+
+        <div class="hero-benefits">
+
+          <div>
+            🛵
+            <strong>Fast Delivery</strong>
+            <small>At your doorstep</small>
+          </div>
+
+          <div>
+            🛡️
+            <strong>Secure Payment</strong>
+            <small>100% secure</small>
+          </div>
+
+          <div>
+            ♧
+            <strong>24/7 Support</strong>
+            <small>We're here to help</small>
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <div class="hero-visual">
+
+        <div class="food-display">
+          🍗
+          🍚
+          🥗
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= SEARCH ================= -->
+
+    <section class="search-section">
+
+      <div class="search-box">
+
+        <span>⌕</span>
+
+        <input
+          type="text"
+          placeholder="Search for restaurants, dishes or groceries..."
+        >
+
+        <button class="search-button">
+          Search
+        </button>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= RESTAURANTS ================= -->
+
+    <section class="restaurant-section" id="restaurants">
+
+      <div class="section-heading">
+
+        <div>
+          <h2>Popular Restaurants</h2>
+          <p>Order from your favorite restaurants</p>
+        </div>
+
+        <a href="#">
+          View All →
+        </a>
+
+      </div>
+
+
+      <div class="slider-hint">
+        Swipe or scroll horizontally →
+      </div>
+
+
+      <!-- HORIZONTAL SLIDER -->
+
+      <div
+        class="restaurant-slider"
+        id="restaurantSlider"
+      >
+
+        <!-- GENESIS -->
+
+        <article class="restaurant-card">
+
+          <div class="restaurant-image">
+            🍗🍟
+          </div>
+
+          <div class="restaurant-info">
+
+            <h3>
+              GENESIS
+            </h3>
+
+            <div class="restaurant-meta">
+
+              <span>⭐ 4.6</span>
+              <span>30–45 mins</span>
+              <span>$$</span>
+
+              <span class="open">
+                Open
+              </span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- KILIMANJARO -->
+
+        <article class="restaurant-card">
+
+          <div class="restaurant-image">
+            🏔️🍽️
+          </div>
+
+          <div class="restaurant-info">
+
+            <h3>
+              KILIMANJARO
+            </h3>
+
+            <div class="restaurant-meta">
+
+              <span>⭐ 4.7</span>
+              <span>30–50 mins</span>
+              <span>$$$</span>
+
+              <span class="open">
+                Open
+              </span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- CHICKEN REPUBLIC -->
+
+        <article class="restaurant-card">
+
+          <div class="restaurant-image">
+            🍗🥤
+          </div>
+
+          <div class="restaurant-info">
+
+            <h3>
+              CHICKEN REPUBLIC
+            </h3>
+
+            <div class="restaurant-meta">
+
+              <span>⭐ 4.5</span>
+              <span>25–40 mins</span>
+              <span>$$</span>
+
+              <span class="open">
+                Open
+              </span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- EXTRA CARD -->
+
+        <article class="restaurant-card">
+
+          <div class="restaurant-image">
+            🍕🥤
+          </div>
+
+          <div class="restaurant-info">
+
+            <h3>
+              DOMINO'S
+            </h3>
+
+            <div class="restaurant-meta">
+
+              <span>⭐ 4.4</span>
+              <span>25–40 mins</span>
+              <span>$$</span>
+
+              <span class="open">
+                Open
+              </span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+
+        <!-- EXTRA CARD -->
+
+        <article class="restaurant-card">
+
+          <div class="restaurant-image">
+            🍔🍟
+          </div>
+
+          <div class="restaurant-info">
+
+            <h3>
+              LOCAL FAVORITE
+            </h3>
+
+            <div class="restaurant-meta">
+
+              <span>⭐ 4.5</span>
+              <span>30–45 mins</span>
+              <span>$$</span>
+
+              <span class="open">
+                Open
+              </span>
+
+            </div>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= FEATURED MEALS ================= -->
+
+    <section class="meals-section">
+
+      <div class="section-heading">
+
+        <div>
+          <h2>Featured Meals</h2>
+          <p>Popular meals people are ordering</p>
+        </div>
+
+        <a href="#">
+          View Full Menu →
+        </a>
+
+      </div>
+
+
+      <div class="meal-grid">
+
+
+        <article class="meal-card">
+
+          <div class="meal-image">
+            🍛🍗
+          </div>
+
+          <h3>
+            Jollof Rice & Chicken
+          </h3>
+
+          <p>
+            Spicy jollof rice with grilled chicken
+          </p>
+
+          <div class="meal-bottom">
+
+            <strong>
+              ₦3,500
+            </strong>
+
+            <button class="add-button">
+              +
+            </button>
+
+          </div>
+
+        </article>
+
+
+        <article class="meal-card">
+
+          <div class="meal-image">
+            🍲
+          </div>
+
+          <h3>
+            Beef Stew
+          </h3>
+
+          <p>
+            Rich beef stew with white rice
+          </p>
+
+          <div class="meal-bottom">
+
+            <strong>
+              ₦3,200
+            </strong>
+
+            <button class="add-button">
+              +
+            </button>
+
+          </div>
+
+        </article>
+
+
+        <article class="meal-card">
+
+          <div class="meal-image">
+            🍝
+          </div>
+
+          <h3>
+            Creamy Pasta
+          </h3>
+
+          <p>
+            Creamy pasta with grilled chicken
+          </p>
+
+          <div class="meal-bottom">
+
+            <strong>
+              ₦3,800
+            </strong>
+
+            <button class="add-button">
+              +
+            </button>
+
+          </div>
+
+        </article>
+
+
+        <article class="meal-card">
+
+          <div class="meal-image">
+            🐟🍌
+          </div>
+
+          <h3>
+            Fried Fish & Plantain
+          </h3>
+
+          <p>
+            Fried fish served with plantain
+          </p>
+
+          <div class="meal-bottom">
+
+            <strong>
+              ₦2,800
+            </strong>
+
+            <button class="add-button">
+              +
+            </button>
+
+          </div>
+
+        </article>
+
+      </div>
+
+    </section>
+
+
+    <!-- ================= FEATURES ================= -->
+
+    <section class="features">
+
+      <div>
+        🍴
+        <strong>Wide Restaurant Choice</strong>
+        <small>
+          Top restaurants at your fingertips
+        </small>
+      </div>
+
+      <div>
+        📍
+        <strong>Live Order Tracking</strong>
+        <small>
+          Track your order in real time
+        </small>
+      </div>
+
+      <div>
+        🛡️
+        <strong>Safe & Secure</strong>
+        <small>
+          Your payments are protected
+        </small>
+      </div>
+
+      <div>
+        ⏱️
+        <strong>On-time Delivery</strong>
+        <small>
+          We deliver on time, every time
+        </small>
+      </div>
+
+    </section>
+
+
+    <!-- ================= COLOUR SYSTEM ================= -->
+
+    <section class="colour-system">
+
+      <h2>
+        PrimeStar Colour Direction
+      </h2>
+
+      <div class="colour-list">
+
+        <div>
+          <span
+            class="colour navy"
+          ></span>
+
+          <strong>
+            Deep Navy
+          </strong>
+
+          <small>
+            #12315B
+          </small>
+        </div>
+
+
+        <div>
+          <span
+            class="colour gold"
+          ></span>
+
+          <strong>
+            Light Gold
+          </strong>
+
+          <small>
+            #FDDC5C
+          </small>
+        </div>
+
+
+        <div>
+          <span
+            class="colour white"
+          ></span>
+
+          <strong>
+            White
+          </strong>
+
+          <small>
+            #FFFFFF
+          </small>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ================= FOOTER ================= -->
+
+  <footer>
+
+    <strong>
+      PRIMESTAR
+    </strong>
+
+    <p>
+      Foods & Groceries Delivery
+    </p>
+
+  </footer>
+
+
+  <script src="script.js"></script>
+
+</body>
+</html>

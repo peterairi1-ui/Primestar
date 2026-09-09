@@ -1,0 +1,11 @@
+const express = require('express');
+const controller = require('../controllers/catalogController');
+const { requireAdmin } = require('../middleware/auth');
+const router = express.Router();
+router.get('/vendors', controller.listVendors);
+router.post('/vendors', requireAdmin, controller.createVendor);
+router.patch('/vendors/:id', requireAdmin, controller.updateVendor);
+router.get('/products', controller.listProducts);
+router.post('/products', requireAdmin, controller.createProduct);
+router.patch('/products/:id', requireAdmin, controller.updateProduct);
+module.exports = router;
