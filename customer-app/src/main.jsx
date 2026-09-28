@@ -42,6 +42,112 @@ function Social() { return <section className="social" id="contact"><div><Instag
 
 function Footer() { return <footer><div className="footer-brand"><img src={logo} alt="PRIMESTAR" /><p>Fast. Fresh. Reliable.</p></div><div className="footer-links"><a href="#discover">Discover</a><a href="#why">Why PRIMESTAR</a><a href={whatsappLink} target="_blank" rel="noreferrer">Support</a></div><span>© 2026 PRIMESTAR. Our Bike.</span></footer>; }
 
-function App() { const [vendors, setVendors] = useState([]); const [products, setProducts] = useState([]); const [selected, setSelected] = useState(null); const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('primestar-cart') || '[]')); const [product, setProduct] = useState(null); const [drawer, setDrawer] = useState(false); const [checkout, setCheckout] = useState(false); const [packageOpen, setPackageOpen] = useState(false); const [menuOpen, setMenuOpen] = useState(false); const [loading, setLoading] = useState(true); const [apiError, setApiError] = useState(''); useEffect(() => { localStorage.setItem('primestar-cart', JSON.stringify(cart)); }, [cart]); useEffect(() => { api.vendors().then((items) => { setVendors(items); setSelected(items[0] || null); }).catch((error) => setApiError(error.message)).finally(() => setLoading(false)); }, []); useEffect(() => { if (!selected || selected.type !== 'restaurant') { setProducts([]); return; } api.products(selected._id).then(setProducts).catch((error) => setApiError(error.message)); }, [selected]); const addToCart = (item, quantity) => { setCart((current) => { const found = current.find((entry) => entry.product._id === item._id); return found ? current.map((entry) => entry.product._id === item._id ? { ...entry, quantity: entry.quantity + quantity } : entry) : [...current, { product: item, quantity }]; }); setProduct(null); setDrawer(true); }; const changeCart = (id, amount) => setCart((current) => current.map((entry) => entry.product._id === id ? { ...entry, quantity: entry.quantity + amount } : entry).filter((entry) => entry.quantity > 0)); const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0); const scrollToOrder = () => document.querySelector('#discover')?.scrollIntoView({ behavior: 'smooth' }); return <><Marquee /><Header cartCount={cartCount} onCart={() => setDrawer(true)} onMenu={() => setMenuOpen(true)} />{menuOpen && <div className="menu-panel"><button className="close-button" onClick={() => setMenuOpen(false)} aria-label="Close menu"><X /></button><p className="eyebrow eyebrow-navy">PRIMESTAR</p><nav><a href="#top" onClick={() => setMenuOpen(false)}>Home</a><a href="#discover" onClick={() => setMenuOpen(false)}>Discover</a><a href="#discover" onClick={() => setMenuOpen(false)}>GET4ME</a><a href="#discover" onClick={() => setMenuOpen(false)}>Orders</a><a href="#contact" onClick={() => setMenuOpen(false)}>Profile</a><a href="#contact" onClick={() => setMenuOpen(false)}>Login / Create account</a></nav><a className="install-link" href="#top">Install app <ArrowRight size={16} /></a></div>}<main><Hero onOrder={scrollToOrder} />{loading ? <div className="loading-strip"><span className="spinner" /> Finding your local favourites...</div> : apiError && !vendors.length ? <div className="api-notice"><span>Catalog unavailable right now.</span><small>Start the backend and MongoDB to load live vendors and products.</small></div> : <VendorRail vendors={vendors} selectedId={selected?._id} onSelect={setSelected} />}{selected && <section className="selected-content">{selected.type === 'restaurant' ? <RestaurantContent products={products} vendor={selected} onOpen={setProduct} /> : <ServicePanel vendor={selected} onPackage={() => setPackageOpen(true)} />}</section>}<Benefits /><Social /></main><Footer /><a className="whatsapp-float" href={whatsappLink} target="_blank" rel="noreferrer" aria-label="Chat with PRIMESTAR on WhatsApp"><span>Chat with us</span><span className="whatsapp-dot">↗</span></a>{product && <ProductModal product={product} onClose={() => setProduct(null)} onAdd={addToCart} />}{drawer && <CartDrawer cart={cart} onClose={() => setDrawer(false)} onChange={changeCart} onCheckout={() => { setDrawer(false); setCheckout(true); }} />}{checkout && <CheckoutModal cart={cart} onClose={() => setCheckout(false)} onSuccess={(order) => { setCart([]); return order; }} />}{packageOpen && <PackageModal onClose={() => setPackageOpen(false)} />}</>; }
+const vendorCacheKey = 'primestar-vendors-cache';
+const vendorCacheMaxAge = 24 * 60 * 60 * 1000;
+const pendingVendorSelectionMaxAge = 30 * 1000;
+
+function readVendorCache() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(vendorCacheKey) || 'null');
+    const age = Date.now() - cached?.savedAt;
+    const validItems = Array.isArray(cached?.items) && cached.items.length > 0 && cached.items.every((vendor) => vendor?._id && vendor.name && vendor.type);
+    return validItems && age >= 0 && age <= vendorCacheMaxAge ? cached.items : null;
+  } catch {
+    return null;
+  }
+}
+
+function App() {
+  const [vendorCache] = useState(readVendorCache);
+  const [vendors, setVendors] = useState(vendorCache || []);
+  const [products, setProducts] = useState([]);
+  const [selected, setSelectedState] = useState(null);
+  const [cart, setCart] = useState(() => JSON.parse(localStorage.getItem('primestar-cart') || '[]'));
+  const [product, setProduct] = useState(null);
+  const [drawer, setDrawer] = useState(false);
+  const [checkout, setCheckout] = useState(false);
+  const [packageOpen, setPackageOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [loading, setLoading] = useState(!vendorCache);
+  const [apiError, setApiError] = useState('');
+  const authoritativeVendorsRef = React.useRef([]);
+  const vendorRequestStateRef = React.useRef('loading');
+  const pendingVendorIdRef = React.useRef(null);
+  const pendingVendorVersionRef = React.useRef(0);
+  const pendingVendorTimerRef = React.useRef(null);
+  const pendingVendorAttemptedRef = React.useRef(false);
+  useEffect(() => {
+    localStorage.setItem('primestar-cart', JSON.stringify(cart));
+  }, [cart]);
+  const clearPendingVendorSelection = () => {
+    window.clearTimeout(pendingVendorTimerRef.current);
+    pendingVendorTimerRef.current = null;
+    pendingVendorIdRef.current = null;
+    pendingVendorVersionRef.current += 1;
+  };
+  const setSelected = (vendor) => {
+    if (vendorRequestStateRef.current === 'ready') {
+      const freshVendor = authoritativeVendorsRef.current.find((item) => item._id === vendor?._id);
+      if (freshVendor) setSelectedState(freshVendor);
+      return;
+    }
+    if (vendorRequestStateRef.current !== 'loading' || !vendor?._id) return;
+    pendingVendorAttemptedRef.current = true;
+    pendingVendorIdRef.current = vendor._id;
+    const version = ++pendingVendorVersionRef.current;
+    window.clearTimeout(pendingVendorTimerRef.current);
+    pendingVendorTimerRef.current = window.setTimeout(() => {
+      if (pendingVendorVersionRef.current === version) pendingVendorIdRef.current = null;
+    }, pendingVendorSelectionMaxAge);
+  };
+  useEffect(() => {
+    let mounted = true;
+    api.vendors().then((items) => {
+      if (!mounted) return;
+      authoritativeVendorsRef.current = items;
+      vendorRequestStateRef.current = 'ready';
+      setVendors(items);
+      const pendingVendorId = pendingVendorIdRef.current;
+      clearPendingVendorSelection();
+      const confirmedPendingVendor = pendingVendorId && items.find((vendor) => vendor._id === pendingVendorId);
+      setSelectedState(confirmedPendingVendor || (pendingVendorAttemptedRef.current ? null : items[0] || null));
+      try {
+        localStorage.setItem(vendorCacheKey, JSON.stringify({ savedAt: Date.now(), items }));
+      } catch {}
+    }).catch((error) => {
+      if (!mounted) return;
+      vendorRequestStateRef.current = 'failed';
+      clearPendingVendorSelection();
+      setSelectedState(null);
+      setApiError(error.message);
+    }).finally(() => {
+      if (mounted) setLoading(false);
+    });
+    return () => {
+      mounted = false;
+      clearPendingVendorSelection();
+    };
+  }, []);
+  useEffect(() => {
+    if (!selected || selected.type !== 'restaurant') {
+      setProducts([]);
+      return;
+    }
+    api.products(selected._id).then(setProducts).catch((error) => setApiError(error.message));
+  }, [selected]);
+  const addToCart = (item, quantity) => {
+    setCart((current) => {
+      const found = current.find((entry) => entry.product._id === item._id);
+      return found ? current.map((entry) => entry.product._id === item._id ? { ...entry, quantity: entry.quantity + quantity } : entry) : [...current, { product: item, quantity }];
+    });
+    setProduct(null);
+    setDrawer(true);
+  };
+  const changeCart = (id, amount) => setCart((current) => current.map((entry) => entry.product._id === id ? { ...entry, quantity: entry.quantity + amount } : entry).filter((entry) => entry.quantity > 0));
+  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const scrollToOrder = () => document.querySelector('#discover')?.scrollIntoView({ behavior: 'smooth' });
+  return <><Marquee /><Header cartCount={cartCount} onCart={() => setDrawer(true)} onMenu={() => setMenuOpen(true)} />{menuOpen && <div className="menu-panel"><button className="close-button" onClick={() => setMenuOpen(false)} aria-label="Close menu"><X /></button><p className="eyebrow eyebrow-navy">PRIMESTAR</p><nav><a href="#top" onClick={() => setMenuOpen(false)}>Home</a><a href="#discover" onClick={() => setMenuOpen(false)}>Discover</a><a href="#discover" onClick={() => setMenuOpen(false)}>GET4ME</a><a href="#discover" onClick={() => setMenuOpen(false)}>Orders</a><a href="#contact" onClick={() => setMenuOpen(false)}>Profile</a><a href="#contact" onClick={() => setMenuOpen(false)}>Login / Create account</a></nav><a className="install-link" href="#top">Install app <ArrowRight size={16} /></a></div>}<main><Hero onOrder={scrollToOrder} />{loading ? <div className="loading-strip"><span className="spinner" /> Finding your local favourites...</div> : apiError && !vendors.length ? <div className="api-notice"><span>Catalog unavailable right now.</span><small>Start the backend and MongoDB to load live vendors and products.</small></div> : <VendorRail vendors={vendors} selectedId={selected?._id} onSelect={setSelected} />}{selected && <section className="selected-content">{selected.type === 'restaurant' ? <RestaurantContent products={products} vendor={selected} onOpen={setProduct} /> : <ServicePanel vendor={selected} onPackage={() => setPackageOpen(true)} />}</section>}<Benefits /><Social /></main><Footer /><a className="whatsapp-float" href={whatsappLink} target="_blank" rel="noreferrer" aria-label="Chat with PRIMESTAR on WhatsApp"><span>Chat with us</span><span className="whatsapp-dot">↗</span></a>{product && <ProductModal product={product} onClose={() => setProduct(null)} onAdd={addToCart} />}{drawer && <CartDrawer cart={cart} onClose={() => setDrawer(false)} onChange={changeCart} onCheckout={() => { setDrawer(false); setCheckout(true); }} />}{checkout && <CheckoutModal cart={cart} onClose={() => setCheckout(false)} onSuccess={(order) => { setCart([]); return order; }} />}{packageOpen && <PackageModal onClose={() => setPackageOpen(false)} />}</>;
+}
 
 createRoot(document.getElementById('root')).render(<App />);
+
